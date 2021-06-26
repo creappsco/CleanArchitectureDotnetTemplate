@@ -2,8 +2,10 @@
 {
     using Clean.Core.Domain.Base;
     using Microsoft.EntityFrameworkCore.Storage;
+    using Microsoft.Extensions.Primitives;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -31,34 +33,34 @@
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        Task<T> AddAsync(T entity);
+        Task<T> AddAsync(T entity, CancellationToken token = default);
 
         /// <summary>
         /// Add a new Entity object
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        Task<IList<T>> AddRangeAsync(IList<T> entities);
+        Task<IList<T>> AddRangeAsync(IList<T> entities, CancellationToken token = default);
 
         /// <summary>
         /// Update a existing Entity
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        Task UpdateAsync(T entity);
+        Task UpdateAsync(T entity, CancellationToken token = default);
 
         /// <summary>
         /// Delete a existing
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        Task DeleteAsync(T entity);
+        Task DeleteAsync(T entity, CancellationToken token = default);
 
         /// <summary>
         /// Save model changes asynchronously
         /// </summary>
         /// <returns></returns>
-        Task<int> SaveChangesAsync();
+        Task<int> SaveChangesAsync(CancellationToken token = default);
 
         /// <summary>
         /// Begins the transaction

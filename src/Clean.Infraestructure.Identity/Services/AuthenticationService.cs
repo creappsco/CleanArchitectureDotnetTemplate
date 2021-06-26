@@ -17,21 +17,35 @@ using Clean.Infraestructure.Identity.Models;
 
 namespace Clean.Infraestructure.Identity.Services
 {
+    /// <summary>
+    /// Class that allow Auth process
+    /// </summary>
     public class AuthenticationService : IAuthenticationService
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly JwtSettings _jwtSettings;
 
+        /// <summary>
+        /// Create a new object 
+        /// </summary>
+        /// <param name="userManager"></param>
+        /// <param name="signInManager"></param>
+        /// <param name="jwtSettings"></param>
         public AuthenticationService(UserManager<ApplicationUser> userManager,
-                IOptions<JwtSettings> jwtSettings,
-                SignInManager<ApplicationUser> signInManager)
+                SignInManager<ApplicationUser> signInManager,
+                IOptions<JwtSettings> jwtSettings)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings.Value;
             _signInManager = signInManager;
         }
 
+        /// <summary>
+        /// Authenticate an user
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         public async Task<AuthenticationResponse> AuthenticateAsync(AuthenticationRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
@@ -61,6 +75,12 @@ namespace Clean.Infraestructure.Identity.Services
             return response;
         }
 
+        /// <summary>
+        /// Register a new user and register in the role
+        /// </summary>
+        /// <param name="request">User Information</param>
+        /// <param name="rol">Rol name</param>
+        /// <returns></returns>
         public async Task<RegistrationResponse> RegisterAsync(RegistrationRequest request, string rol)
         {
             var existingUser = await _userManager.FindByNameAsync(request.Email);
@@ -76,7 +96,7 @@ namespace Clean.Infraestructure.Identity.Services
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 UserName = request.Email,
-                EmailConfirmed = true 
+                EmailConfirmed = true
             };
 
             var existingEmail = await _userManager.FindByEmailAsync(request.Email);
@@ -86,9 +106,9 @@ namespace Clean.Infraestructure.Identity.Services
                 var result = await _userManager.CreateAsync(user, request.Password);
 
                 if (result.Succeeded)
-                { 
+                {
 
-                    await _userManager.AddToRoleAsync(user, rol.ToString()); 
+                    await _userManager.AddToRoleAsync(user, rol.ToString());
 
                     return new RegistrationResponse() { UserId = user.Id };
                 }
@@ -102,7 +122,6 @@ namespace Clean.Infraestructure.Identity.Services
                 throw new Exception($"Email {request.Email } ya se encuentra registrado.");
             }
         }
-
 
         private async Task<JwtSecurityToken> GenerateToken(ApplicationUser user)
         {

@@ -9,20 +9,22 @@ namespace Clean.Tests.UnitTests.Utilities
     using Microsoft.EntityFrameworkCore.ChangeTracking;
     using System;
     using Clean.Tests.UnitTests.Extensions.MocksUtils;
+    using Clean.Core.Domain.Base;
+    using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 
     public static class TestsHelpers
     {
 
-        internal static Mock<DbSet<T>> GetMockDbSet<T>(IList<T> entities) where T : class
+        internal static Mock<DbSet<T>> GetMockDbSet<T, TId>(IList<T> entities) where T : class, IEntityWithTypedId<TId>
         {
-            return PrepareDbSet(entities);
+            return PrepareDbSet<T, TId>(entities);
         }
-        internal static Mock<DbSet<T>> GetMockDbSet<T>(T entity) where T : class
+        internal static Mock<DbSet<T>> GetMockDbSet<T, TId>(T entity) where T : class, IEntityWithTypedId<TId>
         {
             var entities = new List<T> { entity };
-            return PrepareDbSet(entities);
+            return PrepareDbSet<T, TId>(entities);
         }
-        private static Mock<DbSet<T>> PrepareDbSet<T>(IList<T> entities) where T : class
+        private static Mock<DbSet<T>> PrepareDbSet<T, TId>(IList<T> entities) where T : class, IEntityWithTypedId<TId>
         {
             var mockSet = new Mock<DbSet<T>>();
             var enumerable = new MockAsyncEnumerable<T>(entities);
@@ -36,11 +38,20 @@ namespace Clean.Tests.UnitTests.Utilities
                             .Setup(x => x.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
                             .Returns(new MockAsyncEnumerator<T>(entities.GetEnumerator()));
 
-            mockSet.Setup(m => m.Add(It.IsAny<T>())).Callback<T>((T model) => { entities.Add(model); });
-
 
             mockSet.Setup(_ => _.AddAsync(It.IsAny<T>(), It.IsAny<CancellationToken>()))
                            .Callback((T model, CancellationToken token) => { entities.Add(model); });
+
+
+            mockSet.Setup(m => m.AddRangeAsync(It.IsAny<IEnumerable<T>>(), It.IsAny<CancellationToken>()))
+                                   .Callback((IEnumerable<T> model, CancellationToken token) =>
+                                   {
+                                       foreach (var item in model)
+                                       {
+                                           entities.Add(item);
+                                       }
+                                   });
+
 
             mockSet.Setup(m => m.Remove(It.IsAny<T>()))
                           .Callback((T model) => { entities.Remove(model); });
@@ -60,6 +71,10 @@ namespace Clean.Tests.UnitTests.Utilities
                               var index = entities.IndexOf(model);
                               entities.Insert(index, model);
                           });
+
+            mockSet.Setup(m => m.FindAsync(It.IsAny<int>()))
+                          .Callback((object[] id) => entities.FirstOrDefault(x => x.Id.Equals(id[0])));
+
             return mockSet;
         }
     }

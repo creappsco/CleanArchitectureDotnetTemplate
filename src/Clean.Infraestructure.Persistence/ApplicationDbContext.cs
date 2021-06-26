@@ -24,5 +24,9 @@ namespace Clean.Infraestructure.Persistence
         {
 
         }
+        public void SetModified(object entity)
+        {
+            Entry(entity).State = EntityState.Modified;
+        }
     }
 }

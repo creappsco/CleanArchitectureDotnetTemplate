@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Clean.Core.Application.Contracts.Persistence.Base;
 using Clean.Core.Domain.Base;
@@ -30,26 +31,41 @@ namespace Clean.Infraestructure.Persistence.Repositories
             DbSet = _dbContext.Set<T>();
         }
 
-        public async Task<IList<T>> AddRangeAsync(IList<T> entities)
+        /// <summary>
+        /// Add a new Entity object
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public async Task<IList<T>> AddRangeAsync(IList<T> entities, CancellationToken token = default)
         {
-            await _dbContext.Set<T>().AddRangeAsync(entities);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.Set<T>().AddRangeAsync(entities, token);
+            await _dbContext.SaveChangesAsync(token);
 
             return entities;
         }
 
-        public async Task<T> AddAsync(T entity)
+        /// <summary>
+        /// Add a new Entity object
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public async Task<T> AddAsync(T entity, CancellationToken token = default)
         {
-            await _dbContext.Set<T>().AddAsync(entity);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.Set<T>().AddAsync(entity, token);
+            await _dbContext.SaveChangesAsync(token);
 
             return entity;
         }
 
-        public async Task DeleteAsync(T entity)
+        /// <summary>
+        /// Delete a existing
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public async Task DeleteAsync(T entity, CancellationToken token = default)
         {
             _dbContext.Set<T>().Remove(entity);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(token);
         }
 
         /// <summary>
@@ -67,21 +83,31 @@ namespace Clean.Infraestructure.Persistence.Repositories
         public IQueryable<T> Query() =>
           DbSet;
 
-        public async Task<int> SaveChangesAsync() =>
-            await _dbContext.SaveChangesAsync();
+        /// <summary>
+        /// Save model changes asynchronously
+        /// </summary>
+        /// <returns></returns>
+        public async Task<int> SaveChangesAsync(CancellationToken token = default) =>
+            await _dbContext.SaveChangesAsync(token);
 
-
-        public async Task UpdateAsync(T entity)
+        /// <summary>
+        /// Update a existing Entity
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public async Task UpdateAsync(T entity, CancellationToken token = default)
         {
-            _dbContext.Entry(entity).State = EntityState.Modified;
-            await _dbContext.SaveChangesAsync();
+            //_dbContext.Entry(entity).State = EntityState.Modified;
+            _dbContext.Set<T>().Update(entity);
+            await _dbContext.SaveChangesAsync(token);
         }
-        
+
         /// <summary>
         /// Begins the Db transaction
         /// </summary>
         /// <returns></returns>
         public IDbContextTransaction BeginTransaction() =>
             _dbContext.Database.BeginTransaction();
+         
     }
 }
