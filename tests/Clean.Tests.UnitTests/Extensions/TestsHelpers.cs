@@ -11,6 +11,9 @@ namespace Clean.Tests.UnitTests.Utilities
     using Clean.Tests.UnitTests.Extensions.MocksUtils;
     using Clean.Core.Domain.Base;
     using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
+    using Clean.Core.Application.Contracts.Persistence.Base;
+    using Clean.Infraestructure.Persistence;
+    using Clean.Infraestructure.Persistence.Repositories;
 
     public static class TestsHelpers
     {
@@ -24,6 +27,27 @@ namespace Clean.Tests.UnitTests.Utilities
             var entities = new List<T> { entity };
             return PrepareDbSet<T, TId>(entities);
         }
+
+        internal static IRepository<T, TId> GetRepository<T, TId>(IList<T> entities) where T : class, IEntityWithTypedId<TId>
+        {
+            Mock<ApplicationDbContext> context = new Mock<ApplicationDbContext>();
+
+            var dbSetMock = TestsHelpers.GetMockDbSet<T, TId>(entities);
+            context.Setup(x => x.Set<T>()).Returns(dbSetMock.Object);
+
+            return new Repository<T, TId>(context.Object);
+        }
+
+        internal static IRepository<T, TId> GetRepository<T, TId>(T entity) where T : class, IEntityWithTypedId<TId>
+        {
+            Mock<ApplicationDbContext> context = new Mock<ApplicationDbContext>();
+
+            var dbSetMock = TestsHelpers.GetMockDbSet<T, TId>(entity);
+            context.Setup(x => x.Set<T>()).Returns(dbSetMock.Object);
+
+            return new Repository<T, TId>(context.Object);
+        }
+
         private static Mock<DbSet<T>> PrepareDbSet<T, TId>(IList<T> entities) where T : class, IEntityWithTypedId<TId>
         {
             var mockSet = new Mock<DbSet<T>>();

@@ -1,4 +1,4 @@
-﻿using Clean.Core.Domain.Base; 
+﻿using Clean.Core.Domain.Base;
 
 namespace Clean.Core.Domain.Entities
 {
@@ -6,5 +6,6 @@ namespace Clean.Core.Domain.Entities
     {
         public string Name { get; set; }
         public string Description { get; set; }
+        public Category Category { get; set; }
     }
 }
