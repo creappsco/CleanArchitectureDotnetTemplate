@@ -97,7 +97,7 @@ namespace Clean.Tests.UnitTests.Utilities
                           });
 
             mockSet.Setup(m => m.FindAsync(It.IsAny<int>()))
-                          .Callback((object[] id) => entities.FirstOrDefault(x => x.Id.Equals(id[0])));
+                          .ReturnsAsync((object[] id) => { return entities.FirstOrDefault(x => x.Id.Equals(id[0])); });
 
             return mockSet;
         }

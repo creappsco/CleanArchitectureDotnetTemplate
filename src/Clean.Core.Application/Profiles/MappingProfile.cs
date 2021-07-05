@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using Clean.Core.Application.Features.ToDos.Commands.CreateCategory;
+using Clean.Core.Application.Models.Dto;
+using Clean.Core.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +17,8 @@ namespace Clean.Core.Application.Profiles
     {
         public MappingProfile()
         {
+            CreateMap<CategoryDto, Category>().ReverseMap();
+            CreateMap<ToDoDto, ToDo>().ReverseMap();
         }
     }
 }

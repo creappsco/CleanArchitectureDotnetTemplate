@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Clean.Core.Application.Contracts.Persistence.Base;
+using Clean.Core.Application.Models.Dto;
 using Clean.Core.Application.Responses;
 using Clean.Core.Domain.Entities;
 using MediatR;
@@ -18,15 +19,9 @@ namespace Clean.Core.Application.Features.ToDos.Commands.CreateCategory
         public string Description { get; set; }
     }
 
-    public class CreateCategoryDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-    }
-
     public class CreateCategoryResponse : BaseResponse
     {
-        public CreateCategoryDto Category { get; set; }
+        public CategoryDto Category { get; set; }
     }
 
     public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, CreateCategoryResponse>
@@ -61,7 +56,7 @@ namespace Clean.Core.Application.Features.ToDos.Commands.CreateCategory
             {
                 var category = new Category() { Name = request.Name, Description = request.Description };
                 category = await _repository.AddAsync(category);
-                createCategoryCommandResponse.Category = _mapper.Map<CreateCategoryDto>(category);
+                createCategoryCommandResponse.Category = _mapper.Map<CategoryDto>(category);
             }
 
             return createCategoryCommandResponse;

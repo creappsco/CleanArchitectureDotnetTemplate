@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Clean.Core.Application.Contracts.Persistence.Base;
 using Clean.Core.Application.Features.ToDos.Commands.CreateCategory;
+using Clean.Core.Application.Features.ToDos.Commands.UpdateCategory;
 using Clean.Core.Application.Profiles;
 using Clean.Core.Domain.Entities;
 using Clean.Infraestructure.Persistence;
@@ -16,11 +17,11 @@ using Xunit;
 
 namespace Clean.Tests.UnitTests.Features
 {
-    public class CreateCategoryTests
+    public class UpdateCategoryTests
     {
         private readonly IMapper _mapper;
 
-        public CreateCategoryTests()
+        public UpdateCategoryTests()
         {
             var configurationProvider = new MapperConfiguration(cfg =>
             {
@@ -31,14 +32,14 @@ namespace Clean.Tests.UnitTests.Features
         }
 
         [Fact]
-        public async void CreateCategory_Should_Fail_On_Error_In_Data()
+        public async void UpdateCategory_Should_Fail_On_Error_In_Data()
         {
             //Arrange
             var testObject = new Category { Id = 1, Name = "", Description = "" };
             var repository = TestsHelpers.GetRepository<Category, int>(testObject);
-            var command = new CreateCategoryCommand { Name = testObject.Name, Description = testObject.Description };
+            var command = new UpdateCategoryCommand { Name = testObject.Name, Description = testObject.Description };
             //Act
-            var handler = new CreateCategoryCommandHandler(repository, _mapper);
+            var handler = new UpdateCategoryCommandHandler(repository, _mapper);
 
             var result = await handler.Handle(command, CancellationToken.None);
             //Assert
@@ -48,15 +49,16 @@ namespace Clean.Tests.UnitTests.Features
         }
 
         [Fact]
-        public async void CreateCategory_Should_Work()
+        public async void UpdateCategory_Should_Work()
         {
             //Arrange
 
-            var testObject = new Category { Id = 1, Name = "Todo List Category", Description = "This list a is demo" };
+            var testObject = new Category { Id = 1, Name = "New Todo List Category", Description = "New This list a is demo" };
             var repository = TestsHelpers.GetRepository<Category, int>(testObject);
-            var command = new CreateCategoryCommand { Name = testObject.Name, Description = testObject.Description };
-            //Act
-            var handler = new CreateCategoryCommandHandler(repository, _mapper);
+            var command = new UpdateCategoryCommand { CategoryId = testObject.Id, Name = testObject.Name, Description = testObject.Description };
+            //Act 
+
+            var handler = new UpdateCategoryCommandHandler(repository, _mapper);
 
             var result = await handler.Handle(command, CancellationToken.None);
             //Assert
